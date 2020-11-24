@@ -84,6 +84,10 @@ class Analysis:
             '5' : 'There should be \'procedure\'',
             '6' : 'Loss a \'(\'',
             '7' : 'Loss a \')\'',
+            '8' : 'There should be \'begin\'',
+            '9' : 'There should be \'end\'',
+            '10' : 'There should be \'odd\' or an exp',
+            '11' : 'There should be \'then\'',
         }
         print(error[t])
 
@@ -163,8 +167,59 @@ class Analysis:
         else:
             self.error_print(5)  
 
-                
-                    
+    def body(self):
+        if self.alpha == 'begin':
+            self.next_alpha()
+            self.statement()
+            while self.alpha == ';':
+                self.next_alpha()
+                self.statement()
+            if self.alpha == 'end':
+                self.next_alpha()
+            else:
+                self.error_print(9)
+        else:
+            self.error_print(8)
+
+    def lexp(self):
+        if self.gram.in_first(self.alpha, 'exp'):
+            self.exp()
+            self.lop()
+            self.exp()
+        elif self.alpha == 'odd':
+            self.next_alpha()
+            self.exp()
+        else:
+            self.error_print(10)
+
+    def exp(self):
+        if self.alpha == '+' or self.alpha == '-':
+            self.next_alpha()
+        self.term()
+        while self.gram.in_first(self.alpha, 'aop'):
+            self.aop()
+            self.term()
+        
+    def statement(self):
+        if self.alpha == 'if':
+            self.next_alpha()
+            self.lexp()
+            if self.alpha == 'then':
+                self.next_alpha()
+                self.statement()
+                if self.alpha == 'else':
+                    self.next_alpha()
+                    self.statement()
+            else:
+                self.error_print(11)
+        elif self.gram.in_first(self.alpha, 'id'):
+            self.id()
+            if self.alpha == ':=':
+                self.next_alpha()
+                self.exp()
+            else:
+                self.error_print(3)
+        
 
 
                     
