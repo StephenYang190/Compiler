@@ -1,8 +1,8 @@
 def errorProcess(t):
     error = {
-        0 : "Don't have = after :",
-        1 : "Don't have this char in the grammer",
-        2 : "Integer can not have letter",
+        '0' : "Don't have = after :",
+        '1' : "Don't have this char in the grammer",
+        '2' : "Integer can not have letter",
     }
 
     print(error[t])
@@ -14,9 +14,9 @@ if __name__ == "main":
     out_file = ""
     state = 0
 
-    with open(in_file, 'r') as in:
+    with open(in_file, 'r') as infile:
         out = open(out_file, 'w')
-        lines = in.readlines()
+        lines = infile.readlines()
 
         column = 0
         row = 0
