@@ -68,10 +68,18 @@ class Grammer:
 class Analysis:
     def __init__(self, FilePath):
         self.lines = open(FilePath, 'r').readlines()
-        self.alpha = l
+        self.alpha = self.lines[0]
+        self.index = 0
         slef.gram = Grammer()
 
     def next_alpha(self):
+        self.index = self.index + 1
+        if self.index < len(self.lines):
+            self.alpha = self.lines[self.index]
+            return True
+        else:
+            print('Compilter all words.')
+            return False
 
     def error_print(self, t):
         t = str(t)
@@ -88,98 +96,234 @@ class Analysis:
             '9' : 'There should be \'end\'',
             '10' : 'There should be \'odd\' or an exp',
             '11' : 'There should be \'then\'',
+            '12' : 'There should be \'do\'',
+            '13' : 'Don\'t statisfy the requirement of \'statement\'',
+            '14' : 'Don\'t statisfy the requirement of \'factor\'',
+            '15' : 'It\'s not a \'lop\'',
+            '16' : 'It\'s not a \'aop\'',
+            '17' : 'It\'s not a \'mop\'',
+            '18' : '\'id\' should begin with letter',
+            '19' : '\'id\' have illegal character',
+            '20' : '\'integer\' have illegal character',
+            '21' : 'Program is missing \'id\' part',
+            '22' : 'Program is missing \'const\' part',
+            '23' : 'Program is missing \'body\' part',
+            '24' : 'Program is missing \'block\' part',
+            '25' : 'Program is missing \'integer\' part',
+            '26' : 'Program is missing \'condecl\' part',
+            '27' : 'Program is missing \'vardecl\' part',
+            '28' : 'Program is missing \'proc\' part',
+            '29' : 'Program is missing \'statement\' part',
         }
         print(error[t])
 
+#prog
     def prog(self):
         if self.alpha == 'program':
-            self.next_alpha()
-            self.id()
-            if self.alpha == ';':
-                self.block()
-            else:
-                self.error_print(0)    
+            if not self.next_alpha():
+                self.error_print(21)
+                self.error_print(24)
+                return False
         else:
             self.error_print(1)
+        
+        if not self.id():
+            self.error_print(21)
+            self.error_print(24)
+            return False
 
+        if self.alpha == ';':
+            if not self.next_alpha():
+                self.error_print(24)
+                return False
+        else:
+            self.error_print(0)
+        
+        if not self.block():
+            self.error_print(24)
+            return False
+        
+        return True
+
+#block
     def block(self):
         if self.gram.in_first(self.alpha, 'condecl'):
-            self.condecl()
+            if not self.condecl():
+                self.error_print(26)
+                self.error_print(23)
+                return False
         
         if self.gram.in_first(self.alpha, 'vardecl'):
-            self.vardecl()
+            if not self.vardecl():
+                self.error_print(27)
+                self.error_print(23)
+                return False
 
         if self.gram.in_first(self.alpha, 'proc'):
-            self.proc()
+            if not self.proc():
+                self.error_print(28)
+                self.error_print(23)
+                return False
         
-        self.body()
+        if not self.body():
+            self.error_print(23)
+            return False
+        return True
 
+#condecl
     def condecl(self):
         if self.alpha = 'const':
-            self.next_alpha()
-            self.const()
-
-            while self.alpha == ',':
-                self.next_alpha()
-                self.const()
+            if not self.next_alpha():
+                self.error_print(22)
+                return False
         else:
             self.error_print(2)
 
+        if not self.const():
+            self.error_print(22)
+            return False
+
+        while self.alpha == ',':
+            if not self.next_alpha():
+                self.error_print(22)
+                return False
+            
+            if not self.const():
+                self.error_print(22)
+                return False
+        
+        return True
+
+#const
     def const(self):
         self.id()
+
         if self.alpha == ':=':
-            self.next_alpha()
-            self.integer()
+            if not self.next_alpha():
+                self.error_print(25)
+                return False
+            if not self.integer():
+                return False
         else:
             self.error_print(3)
 
+        return True
+
+#vardecl
     def vardecl(self):
         if self.alpha == 'var':
-            self.next_alpha()
-            self.id()
-            while self.alpha == ',':
-                self.next_alpha()
-                self.id()
-            if self.alpha == ';':
-                self.next_alpha()
-            else:
-                self.error_print(0)
+            if not self.next_alpha():
+                self.error_print(21)
+                return False
         else:
             self.error_print(4)
 
+        if not self.id():
+            self.error_print(21)
+                return False
+
+        while self.alpha == ',':
+            if not self.next_alpha():
+                self.error_print(21)
+                return False
+            if not self.id():
+                self.error_print(21)
+                return False
+
+        if self.alpha == ';':
+            if not self.next_alpha():
+                return False
+        else:
+            self.error_print(0)
+
+        return True
+
+#proc
     def proc(self):
         if self.alpha == 'procedure':
-            self.next_alpha()
-            self.id()
-            if self.alpha == '(':
-                if self.gram.in_first(self.alpha, 'id'):
-                    self.id()
-                    while self.alpha == ',':
-                        self.next_alpha()
-                        self.id()
-                if self.alpha == ')':
-                    self.next_alpha()
-                else:
-                    self.error_print(7)
-            else:
-                self.error_print(6)
-
+            if not self.next_alpha():
+                self.error_print(21)
+                return False
         else:
-            self.error_print(5)  
+            self.error_print(5)
 
+        if not self.id():
+            
+            return False
+
+        if self.alpha == '(':
+            if not self.next_alpha():
+                self.error_print(7)
+                return False
+        else:
+            self.error_print(6)
+
+        if self.gram.in_first(self.alpha, 'id'):
+            if not self.id():
+                self.error_print(21)
+                return False
+            while self.alpha == ',':
+                if not self.next_alpha():
+                    self.error_print(21)
+                    return False
+                if not self.id():
+                    self.error_print(21)
+                    return False
+                    
+        if self.alpha == ')':
+            if not self.next_alpha():
+                self.error_print(24)
+                return False
+        else:
+            self.error_print(7)
+
+        if self.alpha == ';':
+            if not self.next_alpha():
+                self.error_print(24)
+                return False
+        else:
+            self.error_print(0)
+        
+        if not self.block():
+            return False
+        
+        while self.alpha == ';':
+            if not self.next_alpha():
+                self.error_print(28)
+                return False
+            
+            if not self.proc():
+                return False
+        
+        return True
+
+#body
     def body(self):
         if self.alpha == 'begin':
-            self.next_alpha()
-            self.statement()
-            while self.alpha == ';':
-                self.next_alpha()
-                self.statement()
-            if self.alpha == 'end':
-                self.next_alpha()
-            else:
-                self.error_print(9)
+            if not self.next_alpha():
+                self.error_print(29)
+                return False
         else:
             self.error_print(8)
+        
+        if not self.statement():
+            return False
+
+        while self.alpha == ';':
+            if not self.next_alpha():
+                self.error_print(21)
+                return False
+            if not self.statement():
+                return False
+        
+        if self.alpha == 'end':
+            if not self.next_alpha():
+                self.error_print(21)
+                return False
+        else:
+            self.error_print(9)
+
+        return True
 
     def lexp(self):
         if self.gram.in_first(self.alpha, 'exp'):
@@ -187,14 +331,18 @@ class Analysis:
             self.lop()
             self.exp()
         elif self.alpha == 'odd':
-            self.next_alpha()
+            if not self.next_alpha():
+                self.error_print(21)
+                return False
             self.exp()
         else:
             self.error_print(10)
 
     def exp(self):
         if self.alpha == '+' or self.alpha == '-':
-            self.next_alpha()
+            if not self.next_alpha():
+                self.error_print(21)
+                return False
         self.term()
         while self.gram.in_first(self.alpha, 'aop'):
             self.aop()
@@ -202,26 +350,190 @@ class Analysis:
         
     def statement(self):
         if self.alpha == 'if':
-            self.next_alpha()
+            if not self.next_alpha():
+                self.error_print(21)
+                return False
             self.lexp()
             if self.alpha == 'then':
-                self.next_alpha()
+                if not self.next_alpha():
+                self.error_print(21)
+                return False
                 self.statement()
                 if self.alpha == 'else':
-                    self.next_alpha()
+                    if not self.next_alpha():
+                self.error_print(21)
+                return False
                     self.statement()
             else:
                 self.error_print(11)
         elif self.gram.in_first(self.alpha, 'id'):
             self.id()
             if self.alpha == ':=':
-                self.next_alpha()
+                if not self.next_alpha():
+                self.error_print(21)
+                return False
                 self.exp()
             else:
                 self.error_print(3)
+        elif self.alpha == 'while':
+            if not self.next_alpha():
+                self.error_print(21)
+                return False
+            self.lexp()
+            if self.alpha == 'do':
+                if not self.next_alpha():
+                self.error_print(21)
+                return False
+                self.statement()
+            else:
+                self.error_print(12)
+        elif self.alpha == 'call':
+            if not self.next_alpha():
+                self.error_print(21)
+                return False
+            self.id()
+            if self.alpha == '(':
+                if not self.next_alpha():
+                self.error_print(21)
+                return False
+            else:
+                self.error_print(6)
+            if self.gram.in_first(self.alpha, 'exp'):
+                self.exp()
+                while self.alpha == ',':
+                    if not self.next_alpha():
+                self.error_print(21)
+                return False
+                    self.exp()
+                
+            if self.alpha == ')':
+                if not self.next_alpha():
+                self.error_print(21)
+                return False
+            else:
+                self.error_print(7)
+        elif self.alpha == 'read':
+            if not self.next_alpha():
+                self.error_print(21)
+                return False
+            if self.alpha == '(':
+                if not self.next_alpha():
+                self.error_print(21)
+                return False
+            else:
+                self.error_print(6)
+            self.id()
+            while self.alpha == ',':
+                if not self.next_alpha():
+                self.error_print(21)
+                return False
+                self.id()
+            if self.alpha == ')':
+                if not self.next_alpha():
+                self.error_print(21)
+                return False
+            else:
+                self.error_print(7)
+        elif self.alpha == 'write':
+            if not self.next_alpha():
+                self.error_print(21)
+                return False
+            if self.alpha =='(':
+                if not self.next_alpha():
+                self.error_print(21)
+                return False
+            else:
+                self.error_print(6)
+            self.exp()
+            while self.alpha == ',':
+                if not self.next_alpha():
+                self.error_print(21)
+                return False
+                self.exp()
+            if self.alpha == ')':
+                if not self.next_alpha():
+                self.error_print(21)
+                return False
+            else:
+                self.error_print(7)
+        elif self.gram.in_first(self.alpha, 'body'):
+            self.body()
+        else:
+            self.error_print(13)
+    
+    def term(self):
+        self.factor()
+        while self.gram.in_first(self.alpha, 'mop'):
+            self.mop()
+            self.factor()
         
+    def factor(self):
+        if self.gram.in_first(self.alpha, 'id'):
+            self.id()
+        elif self.gram.in_first(self.alpha, 'integer'):
+            self.integer()
+        elif self.alpha == '(':
+            if not self.next_alpha():
+                self.error_print(21)
+                return False
+            self.exp()
+            if self.alpha == ')':
+                if not self.next_alpha():
+                self.error_print(21)
+                return False
+            else:
+                self.error_print(7)
+        else:
+            self.error_print(14)
 
+    def lop(self):
+        lopList = ['=', '<>', '<', '<=', '>', '>=']
+        if self.alpha in lopList:
+            if not self.next_alpha():
+                self.error_print(21)
+                return False
+        else:
+            self.error_print(15)
 
-                    
-                        
+    def aop(self):
+        aopList = ['+', '-']
+        if self.alpha in aopList:
+            if not self.next_alpha():
+                self.error_print(21)
+                return False
+        else:
+            self.error_print(16)
+    
+    def mop(self):
+        mopList = ['*', '/']
+        if self.alpha in mopList:
+            if not self.next_alpha():
+                self.error_print(21)
+                return False
+        else:
+            self.error_print(17)
+
+    def id(self):
+        for index, char in enumerate(self.alpha):
+            if index == 0:
+                if (self.alpha < 'Z' and self.alpha > 'A') or (self.alpha < 'z' and self.alpha > 'a'):
+                    pass
+                else:
+                    self.error_print(18)
+            else:
+                if (self.alpha <= 'Z' and self.alpha >= 'A') or (self.alpha <= 'z' and self.alpha >= 'a'):
+                    pass
+                elif (self.alpha <= '9' and self.alpha >= '0'):
+                    pass
+                else:
+                    self.error_print(19)
+    
+    def integer(self):
+        for index, char in enumerate(self.alpha):
+            if (self.alpha <= '9' and self.alpha >= '0'):
+                pass
+            else:
+                self.error_print(20)
+            
+            
     
