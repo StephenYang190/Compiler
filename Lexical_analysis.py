@@ -8,7 +8,7 @@ def errorProcess(t, char = ''):
     print(error[str(t)] % char)
 
 
-in_file = "C:/Users/StephenYang/Desktop/compiler/in.txt"
+in_file = "in.txt"
 out_file = "out.txt"
 state = 0
 

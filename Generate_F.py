@@ -41,7 +41,97 @@ class Generate:
 
 class Grammer:
     
-    def __init__(self, Non_ters， ters, S):
+    def __init__(self, filepath):
+        infile = open('grammer.txt', 'r')
+        lines = infile.readlines()
+        for line in lines:
+            column = 0
+            candidates = []
+            candidate = []
+            word = ""
+            flag = 0
+            Nonter = ''
+            while column < len(line):
+                char = line[column]
+                if flag == 0:
+                    if char == '<':
+                        continue
+                    elif char >= 'a' and char <= 'z':
+                        Nonter = Nonter + char
+                    else:
+                        flag = 1
+                        self.Non_ters[Nonter] = Generate(Nonter)
+                else:
+                    #state: 0 haven't read any things / 1 read letter / 2 read integer
+                    if state == 0:
+                        if char == ' ' or char == '\n':
+                            pass
+                        elif char == ':':
+                            candidate.append(char)
+                        elif char >= 'a' and char <= 'z':
+                            word = char
+                            state = 1
+                        elif char == '<':
+                            if column + 1 < len(line) and line[column + 1] >= 'a' and line[column + 1] <= 'z':
+                                word = char
+                                state = 2
+                            else:
+                                candidate.append(char)
+                        else:
+                            candidate.append(char)
+                        column = column + 1
+                        
+                    elif state == 1:
+                        if char >= 'a' and char <= 'z':
+                            word = word + char
+                            column = column + 1
+                        elif char >= 'A' and char <= 'Z':
+                            word = word + char
+                            column = column + 1
+                        elif char >= '0' and char <= '9':
+                            word = word + char
+                            column = column + 1
+                        elif char in symbolList:
+                            out.write(word + '\n')
+                            state = 0
+                        elif char == ':' or char == '<' or char == '>' or char == ' ' or char == '\n':
+                            out.write(word + '\n')
+                            state = 0
+                        else:
+                            out.write(word + '\n')
+                            state = 0
+                            errorProcess(1, char)
+                            column = column + 1
+
+                    else:
+                        if char >= '0' and char <= '9':
+                            word = word + char
+                            column = column + 1
+                        elif char >= 'a' and char <= 'z':
+                            errorProcess(2)
+                            column = column + 1
+                        elif char >= 'A' and char <= 'Z':
+                            errorProcess(2)
+                            column = column + 1
+                        elif char in symbolList:
+                            out.write(word + '\n')
+                            state = 0
+                        elif char == ':' or char == '<' or char == '>' or char == ' ' or char == '\n':
+                            out.write(word + '\n')
+                            state = 0
+                        else:
+                            out.write(word + '\n')
+                            state = 0
+                            errorProcess(2)
+                            column = column + 1
+                    
+                out.write(word + '\n')
+                state = 0
+                row = row + 1
+
+                out.close()
+                print('End')       
+
         self.Non_ters = {Non_ter : Generate(Non_ter) for Non_ter in Non_ters}
         self.ters = ters
         self.S = S
@@ -109,14 +199,6 @@ class Grammer:
                                     continue
                             else:
                                 continue
-
-    def recognize(self, alpha):
-        stack = [S]
-        for char in alpha:
-            if stack[0] in self.non_ter:
-            
-            else:
-                if stack[0] == char:
                     
 
 

@@ -1,0 +1,17 @@
+prog program
+block const var procedure begin
+condecl const
+const l
+vardecl var
+body begin
+proc procedure
+statement if while call read write l begin
+lexp odd ( l d
+exp + - ( l d
+term ( l d
+factor ( l d
+lop = <> < <= > >=
+aop + -
+mop * /
+id l
+integer d
