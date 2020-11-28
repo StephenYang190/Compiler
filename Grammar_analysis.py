@@ -1,76 +1,11 @@
-class NonTer:
-
-    def __init__(self, Non_ter):
-        self.Non_ter = Non_ter
-        self.candidates = set()
-        self.first = set()
-        self.follow = set()
-    
-    def append_candidate(self, candidate):
-        self.candidates.add(candidate)
-
-    def append_first(self, ter):
-        self.first.add(ter)
-
-    def append_follow(self, ter):
-        if ter in self.follow:
-            self.follow.add(ter)
-            return True
-        else:
-            return False
-    
-    def get_first(self):
-        return self.first
-
-    def get_follow(self):
-        return self.follow
-
-    def get_candidate(self):
-        return self.candidates
-
-
-class Grammer:
-    
-    def __init__(self, nonters, ters, S):
-        self.Nonters = {Non_ter : NonTer(Non_ter) for Non_ter in nonters}
-        self.ters = ters
-        self.S = S
-
-    def NonTer_candidate(self, non_ter, alpha):
-        self.Nonters[non_ter].append_candidate(alpha)
-
-    def firstSet(self, alpha):
-        if alpha[0] in self.ters:
-            return alpha[0], False
-        else:
-            frstSet = self.Nonters[alpha[0]]
-            if 'ε' in frstSet:
-                if len(alpha) > 1:
-                    frstSet, flag = firstSet(alpha[1:])
-                    frstSet = frstSet | firstSet(alpha[1:])
-                    frstSet = frstSet.remove('ε')
-                    return frstSet, True
-                else:
-                    return frstSet, True
-            else:
-                return frstSet, False
-
-    def recognize(self, filename):
-        stack = [self.S]
-        with open(filename, 'r') as in:
-            lines = in.readlines()
-            for alpha in lines:
-
-    def in_first(self, alpha, nonter):
-        first = self.Nonters[nonter].get_first()
-        return (alpha in first)
+from grammer import Grammer
 
 class Analysis:
-    def __init__(self, FilePath):
+    def __init__(self, FilePath, FirstPath, FollowPath=''):
         self.lines = open(FilePath, 'r').readlines()
         self.alpha = self.lines[0]
         self.index = 0
-        slef.gram = Grammer()
+        self.gram = Grammer(FirstPath)
 
     def next_alpha(self):
         self.index = self.index + 1
@@ -80,6 +15,9 @@ class Analysis:
         else:
             print('Compilter all words.')
             return False
+
+    def analysisFromFile(self):
+        self.prog()
 
     def error_print(self, t):
         t = str(t)
@@ -172,7 +110,7 @@ class Analysis:
 
 #condecl
     def condecl(self):
-        if self.alpha = 'const':
+        if self.alpha == 'const':
             if not self.next_alpha():
                 self.error_print(22)
                 return False
@@ -220,7 +158,7 @@ class Analysis:
 
         if not self.id():
             self.error_print(21)
-                return False
+            return False
 
         while self.alpha == ',':
             if not self.next_alpha():
@@ -325,176 +263,273 @@ class Analysis:
 
         return True
 
+#lexp
     def lexp(self):
         if self.gram.in_first(self.alpha, 'exp'):
-            self.exp()
-            self.lop()
-            self.exp()
+            if not self.exp():
+                return False
+
+            if not self.lop():
+                return False
+
+            if not self.exp():
+                return False
+
         elif self.alpha == 'odd':
             if not self.next_alpha():
                 self.error_print(21)
                 return False
-            self.exp()
+
+            if not self.exp():
+                return False
+
         else:
             self.error_print(10)
 
+        return True
+
+#exp
     def exp(self):
         if self.alpha == '+' or self.alpha == '-':
             if not self.next_alpha():
                 self.error_print(21)
                 return False
-        self.term()
+
+        if not self.term():
+            return False
+
         while self.gram.in_first(self.alpha, 'aop'):
-            self.aop()
-            self.term()
-        
+            if not self.aop():
+                return False
+
+            if not self.term():
+                return False
+
+        return True
+
+#statement        
     def statement(self):
         if self.alpha == 'if':
             if not self.next_alpha():
                 self.error_print(21)
                 return False
-            self.lexp()
+
+            if not self.lexp():
+                return False
+
             if self.alpha == 'then':
                 if not self.next_alpha():
-                self.error_print(21)
-                return False
-                self.statement()
-                if self.alpha == 'else':
-                    if not self.next_alpha():
-                self.error_print(21)
-                return False
-                    self.statement()
+                    self.error_print(21)
+                    return False
+
             else:
                 self.error_print(11)
+
+            if not self.statement():
+                    return False
+
+            if self.alpha == 'else':
+                if not self.next_alpha():
+                    self.error_print(21)
+                    return False
+
+                if not self.statement():
+                    return False
+            else:
+                pass
+
         elif self.gram.in_first(self.alpha, 'id'):
-            self.id()
+            if not self.id():
+                return False
+
             if self.alpha == ':=':
                 if not self.next_alpha():
-                self.error_print(21)
-                return False
-                self.exp()
+                    self.error_print(21)
+                    return False
             else:
                 self.error_print(3)
+            
+            if not self.exp():
+                return False
+
         elif self.alpha == 'while':
             if not self.next_alpha():
                 self.error_print(21)
                 return False
-            self.lexp()
+            
+            if not self.lexp():
+                return False
+
             if self.alpha == 'do':
                 if not self.next_alpha():
-                self.error_print(21)
-                return False
-                self.statement()
+                    self.error_print(21)
+                    return False
             else:
                 self.error_print(12)
+            
+            if not self.statement():
+                return False
+
         elif self.alpha == 'call':
             if not self.next_alpha():
                 self.error_print(21)
                 return False
-            self.id()
+            
+            if not self.id():
+                return False
+
             if self.alpha == '(':
                 if not self.next_alpha():
-                self.error_print(21)
-                return False
+                    self.error_print(21)
+                    return False
+
             else:
                 self.error_print(6)
+
             if self.gram.in_first(self.alpha, 'exp'):
-                self.exp()
+                if not self.exp():
+                    return False
+
                 while self.alpha == ',':
                     if not self.next_alpha():
-                self.error_print(21)
-                return False
-                    self.exp()
+                        self.error_print(21)
+                        return False
+
+                    if not self.exp():
+                        return False
                 
             if self.alpha == ')':
                 if not self.next_alpha():
-                self.error_print(21)
-                return False
+                    self.error_print(21)
+                    return False
             else:
                 self.error_print(7)
+
         elif self.alpha == 'read':
             if not self.next_alpha():
                 self.error_print(21)
                 return False
+
             if self.alpha == '(':
                 if not self.next_alpha():
-                self.error_print(21)
-                return False
+                    self.error_print(21)
+                    return False
             else:
                 self.error_print(6)
-            self.id()
+
+            if not self.id():
+                return False
+
             while self.alpha == ',':
                 if not self.next_alpha():
-                self.error_print(21)
-                return False
-                self.id()
+                    self.error_print(21)
+                    return False
+                if not self.id():
+                    return False
+
             if self.alpha == ')':
                 if not self.next_alpha():
-                self.error_print(21)
-                return False
+                    self.error_print(21)
+                    return False
             else:
                 self.error_print(7)
+
         elif self.alpha == 'write':
             if not self.next_alpha():
                 self.error_print(21)
                 return False
+
             if self.alpha =='(':
                 if not self.next_alpha():
-                self.error_print(21)
-                return False
+                    self.error_print(21)
+                    return False
             else:
                 self.error_print(6)
-            self.exp()
+
+            if not self.exp():
+                return False
+
             while self.alpha == ',':
                 if not self.next_alpha():
-                self.error_print(21)
-                return False
-                self.exp()
+                    self.error_print(21)
+                    return False
+
+                if not self.exp():
+                    return False
+
             if self.alpha == ')':
                 if not self.next_alpha():
-                self.error_print(21)
-                return False
+                    self.error_print(21)
+                    return False
             else:
                 self.error_print(7)
+
         elif self.gram.in_first(self.alpha, 'body'):
-            self.body()
+            if not self.body():
+                return False
+
         else:
             self.error_print(13)
+
+        return True
     
+#term
     def term(self):
-        self.factor()
+        if not self.factor():
+            return False
+
         while self.gram.in_first(self.alpha, 'mop'):
-            self.mop()
-            self.factor()
+            if not self.mop():
+                return False
+
+            if not self.factor():
+                return False
         
+        return True
+
+#factor        
     def factor(self):
         if self.gram.in_first(self.alpha, 'id'):
-            self.id()
+            if not self.id():
+                return False
+
         elif self.gram.in_first(self.alpha, 'integer'):
-            self.integer()
+            if not self.integer():
+               return False
+
         elif self.alpha == '(':
             if not self.next_alpha():
                 self.error_print(21)
                 return False
-            self.exp()
+
+            if not self.exp():
+               return False
+
             if self.alpha == ')':
                 if not self.next_alpha():
-                self.error_print(21)
-                return False
+                    self.error_print(21)
+                    return False
             else:
                 self.error_print(7)
         else:
             self.error_print(14)
 
+        return True
+
+#lop
     def lop(self):
         lopList = ['=', '<>', '<', '<=', '>', '>=']
         if self.alpha in lopList:
             if not self.next_alpha():
                 self.error_print(21)
                 return False
+
         else:
             self.error_print(15)
 
+        return True
+
+#aop
     def aop(self):
         aopList = ['+', '-']
         if self.alpha in aopList:
@@ -503,7 +538,10 @@ class Analysis:
                 return False
         else:
             self.error_print(16)
-    
+
+        return True
+
+#mop
     def mop(self):
         mopList = ['*', '/']
         if self.alpha in mopList:
@@ -512,28 +550,47 @@ class Analysis:
                 return False
         else:
             self.error_print(17)
+        
+        return True
 
+#id
     def id(self):
         for index, char in enumerate(self.alpha):
             if index == 0:
-                if (self.alpha < 'Z' and self.alpha > 'A') or (self.alpha < 'z' and self.alpha > 'a'):
+                if (char < 'Z' and char > 'A') or (char < 'z' and char > 'a'):
                     pass
                 else:
                     self.error_print(18)
             else:
-                if (self.alpha <= 'Z' and self.alpha >= 'A') or (self.alpha <= 'z' and self.alpha >= 'a'):
+                if (char <= 'Z' and char >= 'A') or (char <= 'z' and char >= 'a'):
                     pass
-                elif (self.alpha <= '9' and self.alpha >= '0'):
+                elif (char <= '9' and char >= '0'):
                     pass
                 else:
                     self.error_print(19)
+
+        if not self.next_alpha():
+            self.error_print(21)
+            return False
+
+        return True
     
+#integer
     def integer(self):
-        for index, char in enumerate(self.alpha):
-            if (self.alpha <= '9' and self.alpha >= '0'):
+        for char in self.alpha:
+            if (char <= '9' and char >= '0'):
                 pass
             else:
                 self.error_print(20)
+
+        if not self.next_alpha():
+            self.error_print(21)
+            return False
+
+        return True
             
             
-    
+if __name__ == "__main__":
+
+    PascalAnalysis = Analysis('out.txt', 'first,txt', 'follow.txt')
+    PascalAnalysis.analysisFromFile()
