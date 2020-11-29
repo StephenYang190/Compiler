@@ -1,9 +1,23 @@
-procedure findMin(x, y, z: integer; var m: integer); 
+program xi;
+const a:=5;
+var j,sum,x;
+	procedure suml(x);
+	var j;
+	begin
+		j:=1;
+		sum:=0;
+		while j<=x do
+		begin
+			sum:=sum+j;
+			j:=j+1
+		end;
+		write(sum)
+	end
 begin
-   if x < y then
-      m := x
-   else
-      m := y;
-   if z <m then
-      m := z;
-end; 
+	read(x);
+	write(x);
+	read(j);
+	write(j);
+	call suml(j+5);
+	write(j)
+end

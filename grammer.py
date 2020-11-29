@@ -40,4 +40,13 @@ class Grammer:
 
     def in_first(self, alpha, nonter):
         first = self.Nonters[nonter].get_first()
-        return (alpha in first)
+        crit1 = False
+        crit2 = False
+
+        if 'd' in first:
+            crit2 = (alpha >= '0' and alpha <= '9')
+
+        if 'l' in first:
+            crit1 = ((alpha >= 'a' and alpha <= 'z') or (alpha >= 'A' and alpha <= 'Z'))        
+
+        return (alpha in first and alpha != 'd' ) or crit1 or crit2
