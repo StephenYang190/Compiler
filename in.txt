@@ -1,12 +1,12 @@
-program xi;
+progra xi;
 const a:=5;
-var j,sum,x;
+var j,sum,x
 	procedure suml(x);
 	var j;
 	begin
 		j:=1;
 		sum:=0;
-		while j<=x do
+		while j<=x 
 		begin
 			sum:=sum+j;
 			j:=j+1

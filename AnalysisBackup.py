@@ -30,7 +30,6 @@ class Analysis:
             '19' : '\'id\' have illegal character',
             '20' : '\'integer\' have illegal character',
             '21' : 'Program don\'t finish',
-            '22' : 'Loss ,',
         }
         self.keyWord = ['program', 'const', 'var', 'procedure', 'begin', 'end',
                         'if', 'then', 'else', 'call', 'while', 'do', 'read', 'write']
@@ -120,15 +119,9 @@ class Analysis:
         if not self.const():
             return False
 
-        while True:
-            if self.alpha != ',':
-                if self.in_first('const'):
-                    self.error_print(22)
-                else:
-                    break
-            else:
-                if not self.next_alpha():
-                    return False
+        while self.alpha == ',':
+            if not self.next_alpha():
+                return False
             
             if not self.const():
                 return False
@@ -169,16 +162,9 @@ class Analysis:
         if not self.id():
             return False
 
-        while True:
-            if self.alpha == ',':
-                if not self.next_alpha():
-                    return False
-            else:
-                if self.in_first('id'):
-                    self.error_print(22)
-                else:
-                    break
-
+        while self.alpha == ',':
+            if not self.next_alpha():
+                return False
             if not self.id():
                 return False
 
@@ -214,16 +200,9 @@ class Analysis:
         if self.in_first( 'id'):
             if not self.id():
                 return False
-            while True:
-                if self.alpha == ',':
-                    if not self.next_alpha():
-                        return False
-                else:
-                    if self.in_first('id'):
-                        self.error_print(22)
-                    else:
-                        break
-                
+            while self.alpha == ',':
+                if not self.next_alpha():
+                    return False
                 if not self.id():
                     return False
                     
@@ -246,15 +225,9 @@ class Analysis:
         if not self.block():
             return False
         
-        while True:
-            if self.alpha == ';':
-                if not self.next_alpha():
-                    return False
-            else:
-                if self.in_first('proc'):
-                    self.error_print(22)
-                else:
-                    break
+        while self.alpha == ';':
+            if not self.next_alpha():
+                return False
             
             if not self.proc():
                 return False
@@ -275,15 +248,8 @@ class Analysis:
             return False
 
         while self.alpha == ';':
-            if self.alpha == ';':
-                if not self.next_alpha():
-                    return False
-            else:
-                if self.in_first('statement'):
-                    self.error_print(22)
-                else:
-                    break
-
+            if not self.next_alpha():
+                return False
             if not self.statement():
                 return False
         
@@ -420,15 +386,9 @@ class Analysis:
                 if not self.exp():
                     return False
 
-                while True:
-                    if self.alpha == ',':
-                        if not self.next_alpha():
-                            return False
-                    else:
-                        if self.in_first('exp'):
-                            self.error_print(22)
-                        else:
-                            break
+                while self.alpha == ',':
+                    if not self.next_alpha():                        
+                        return False
 
                     if not self.exp():
                         return False
@@ -454,16 +414,9 @@ class Analysis:
             if not self.id():
                 return False
 
-            while True:
-                if self.alpha == ',':
-                    if not self.next_alpha():
-                        return False
-                else:
-                    if self.in_first('id'):
-                        self.error_print(22)
-                    else:
-                        break
-
+            while self.alpha == ',':
+                if not self.next_alpha():                    
+                    return False
                 if not self.id():
                     return False
 
@@ -489,14 +442,8 @@ class Analysis:
                 return False
 
             while self.alpha == ',':
-                if self.alpha == ',':
-                    if not self.next_alpha():
-                        return False
-                else:
-                    if self.in_first('exp'):
-                        self.error_print(22)
-                    else:
-                        break
+                if not self.next_alpha():                    
+                    return False
 
                 if not self.exp():
                     return False
