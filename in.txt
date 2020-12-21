@@ -1,4 +1,4 @@
-progra xi;
+program xi;
 const a:=5;
 var j,sum,x
 	procedure suml(x);
