@@ -13,3 +13,6 @@ class stack:
     def pop(self):
         self.last = self.last - 1
         return self.param.pop()
+
+    def add(self, off):
+        self.param[self.last] = self.param[self.last] + off
