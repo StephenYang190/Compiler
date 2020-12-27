@@ -1,5 +1,4 @@
 from Grammar_analysis import Analysis
-from Lexical_analysis import LexicalAnalysis
 
 if __name__ == "__main__":
 

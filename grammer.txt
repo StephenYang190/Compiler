@@ -23,7 +23,7 @@ push(0, offset);}
 <const> -- <id>:=<integer>
 {enter(id.name, integer, offset);
 p = lookup(id.name);
-emit(p = <exp>.place);
+emit(p = <integer>.c);
 offset = offset+4;}
 
 <vardecl> -- var A;
@@ -55,7 +55,7 @@ else error}
 {backpatch(<lexp>.truelist, H.quad);
 <statement>.nextlist = merge(<lexp>.falselist, <statement1>.nextlist);}
 
-<statement> -- if <lexp> then H <statement> I else H <statement>
+<statement> -- if <lexp> then H <statement> else I <statement>
 {backpatch(<lexp>.truelist, H.quad);
 backpatch(<lexp>.falselist, H1.quad);
 <statement>.nextlist = merge(<statement1>.nextlist, <statement2>.nextlist, I.nextlist);}
@@ -82,12 +82,14 @@ call id.name;}
 <statement> -- write (<exp>{,<exp>})
 
 <lexp> -- <exp> <lop> <exp>
-{<lexp>.place = newtemp;
-emit(<lexp>.place = <exp1>.place <lop>.c <exp2>.place)}
+{<lexp>.truelist:= makelist(nextquad);
+<lexp>.falselist:= makelist(nextquad+1);
+emit( ́j ́lop.‘ , ’ <exp>.place ‘ , ’<exp1>.place ́ ,  ́ ́0 ́);
+emit( ́j , - , - , 0 ́);}
 
 <lexp> -- odd <exp>
-{<lexp>.place = newtemp;
-emit(<lexp>.place = not <exp>.place)}
+{<lexp>.truelist:=E1.falselist;                                      
+<lexp>.falselist:=E1.truelist}
 
 <exp> -- -<term>D
 {<exp>.place = newtemp;

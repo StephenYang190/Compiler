@@ -1,598 +1,569 @@
 from grammer import Grammer
 from Lexical_analysis import LexicalAnalysis
 from Error_process import ErrorPro
+from Semantics_analysis import Semantics_analysis
 
 
 class Analysis:
     def __init__(self, FilePath, FirstPath, FollowPath=''):
+        self.alpha = None
         self.lines = open(FilePath, 'r').readlines()
         self.row = 0
         self.column = 0
-        self.next_alpha()
-        self.tblptr = []
+        self.anaf = False
+        self.semantics = Semantics_analysis()
 
         self.gram = Grammer(FirstPath)
         self.errp = ErrorPro()
         self.keyWord = ['program', 'const', 'var', 'procedure', 'begin', 'end',
                         'if', 'then', 'else', 'call', 'while', 'do', 'read', 'write']
+        self.lopList = ['=', '<>', '<', '<=', '>', '>=']
+        self.aopList = ['+', '-']
+        self.mopList = ['*', '/']
+        self.next_alpha()
 
     def next_alpha(self):
+        if self.anaf is True:
+            self.alpha = None
+            return False
         line = self.lines[self.row]
         self.alpha, self.column = LexicalAnalysis(line, self.row, self.column)
-        if self.column == len(self.lines[self.row]):
-            self.column = 0
-            self.row = self.row + 1
-
+        while True:
+            if self.column == len(line):
+                self.column = 0
+                self.row = self.row + 1
+                break
+            char = line[self.column]
+            if char == ' ' or char == '\n' or char == '\t':
+                self.column += 1
+            else:
+                break
         if self.row == len(self.lines):
             print('Compilter all words.')
-            return False
+            self.anaf = True
+        return True
 
     def in_first(self, nonter):
         if nonter == 'id':
             if self.alpha in self.keyWord:
                 return False
-        
+
         return self.gram.in_first(self.alpha, nonter)
 
-#prog
+    # prog
     def prog(self):
+        self.semantics.offset.push(0)
         if self.alpha == 'program':
             self.next_alpha()
         else:
-            if self.alpha in program:
-                self.errp(21, self.row, self.column)
+            if self.alpha in 'program':
+                self.errp.error_print(21, self.row, self.column)
                 self.next_alpha()
             elif not self.in_first('id'):
-                self.errp(1, self.row, self.column)
+                self.errp.error_print(1, self.row, self.column)
                 self.next_alpha()
             else:
-                self.errp(1, self.row, self.column)
-        
-        self.id()
-
+                self.errp.error_print(1, self.row, self.column)
+        idname = self.id()
         if self.alpha == ';':
             self.next_alpha()
         else:
-            self.errp(0, self.row, self.column)
+            self.errp.error_print(0, self.row, self.column)
             if not self.in_first('block'):
                 self.next_alpha()
-        
+        self.semantics.M(idname)
+        self.semantics.tbmng.setquad(self.semantics.nextquad)
         self.block()
-        
-        return True
+        self.semantics.prog(idname)
 
-#block
+    # block
     def block(self):
-        if self.in_first( 'condecl'):
-            if not self.condecl():
-                return False
-        
-        if self.in_first( 'vardecl'):
-            if not self.vardecl():
-                return False
+        if self.in_first('condecl'):
+            self.condecl()
 
-        if self.in_first( 'proc'):
-            if not self.proc():
-                return False
-        
-        if not self.body():
-            return False
+        if self.in_first('vardecl'):
+            self.vardecl()
+
+        if self.in_first('proc'):
+            self.proc()
+
+        self.body()
         return True
 
-#condecl
+    # condecl
     def condecl(self):
         if self.alpha == 'const':
             self.next_alpha()
-                return False
         else:
-            self.errp(2, self.row, self.column)
+            self.errp.error_print(2, self.row, self.column)
             if not self.in_first('const'):
                 self.next_alpha()
 
-        if not self.const():
-            return False
+        self.const()
 
         while True:
             if self.alpha != ',':
                 if self.in_first('const'):
-                    self.errp(22, self.row, self.column)
+                    self.errp.error_print(22, self.row, self.column)
                 else:
                     break
             else:
                 self.next_alpha()
-                    return False
-            
-            if not self.const():
-                return False
+
+            self.const()
 
         if self.alpha == ';':
             self.next_alpha()
-                return False
         else:
-            self.errp(0, self.row, self.column)
+            self.errp.error_print(0, self.row, self.column)
 
-        return True
-
-#const
+    # const
     def const(self):
-        self.id()
-            return False
-
+        idname = self.id()
         if self.alpha == ':=':
             self.next_alpha()
-                return False
-            if not self.integer():
-                return False
         else:
-            self.errp(3, self.row, self.column)
+            self.errp.error_print(3, self.row, self.column)
 
-        return True
+        intc = self.integer()
+        self.semantics.const(idname, intc)
 
-#vardecl
+    # vardecl
     def vardecl(self):
         if self.alpha == 'var':
             self.next_alpha()
-                return False
         else:
-            self.errp(4, self.row, self.column)
+            self.errp.error_print(4, self.row, self.column)
             if not self.in_first('id'):
                 self.next_alpha()
 
-        self.id()
-            return False
+        idlist = [self.id()]
 
         while True:
             if self.alpha == ',':
                 self.next_alpha()
-                    return False
             else:
                 if self.in_first('id'):
-                    self.errp(22, self.row, self.column)
+                    self.errp.error_print(22, self.row, self.column)
                 else:
                     break
 
-            self.id()
-                return False
+            idlist.append(self.id())
 
         if self.alpha == ';':
             self.next_alpha()
-                return False
         else:
-            self.errp(0, self.row, self.column)
+            self.errp.error_print(0, self.row, self.column)
 
-        return True
+        self.semantics.vardecl(idlist)
 
-#proc
+    # proc
     def proc(self):
+        self.semantics.layer += 1
         if self.alpha == 'procedure':
             self.next_alpha()
-                return False
         else:
-            self.errp(5, self.row, self.column)
+            self.errp.error_print(5, self.row, self.column)
             if not self.in_first('id'):
                 self.next_alpha()
 
-        self.id()
-            return False
+        idname = self.id()
+        self.semantics.N(idname)
 
         if self.alpha == '(':
             self.next_alpha()
-                return False
         else:
-            self.errp(6, self.row, self.column)
+            self.errp.error_print(6, self.row, self.column)
             if not self.in_first('id') or self.alpha != ')':
                 self.next_alpha()
 
-        if self.in_first( 'id'):
-            self.id()
-                return False
+        idlist = []
+        if self.in_first('id'):
+            idlist.append(self.id())
             while True:
                 if self.alpha == ',':
                     self.next_alpha()
-                        return False
                 else:
                     if self.in_first('id'):
-                        self.errp(22, self.row, self.column)
+                        self.errp.error_print(22, self.row, self.column)
                     else:
                         break
-                
-                self.id()
-                    return False
-                    
+
+                idlist.append(self.id())
+
         if self.alpha == ')':
             self.next_alpha()
-                return False
         else:
-            self.errp(7, self.row, self.column)
+            self.errp.error_print(7, self.row, self.column)
             if self.alpha != ';':
                 self.next_alpha()
+        self.semantics.vardecl(idlist)
 
         if self.alpha == ';':
             self.next_alpha()
-                return False
         else:
-            self.errp(0, self.row, self.column)
+            self.errp.error_print(0, self.row, self.column)
             if not self.in_first('block'):
                 self.next_alpha()
-        
+
+        self.semantics.tbmng.setquad(self.semantics.nextquad)
         self.block()
-            return False
-        
         while True:
             if self.alpha == ';':
                 self.next_alpha()
-                    return False
             else:
                 if self.in_first('proc'):
-                    self.errp(22, self.row, self.column)
+                    self.errp.error_print(22, self.row, self.column)
                 else:
                     break
-            
-            if not self.proc():
-                return False
-        
-        return True
 
-#body
+            self.proc()
+
+        self.semantics.proc(idname)
+        self.semantics.layer -= 1
+
+    # body
     def body(self):
         if self.alpha == 'begin':
             self.next_alpha()
-                return False
         else:
-            self.errp(8, self.row, self.column)
+            self.errp.error_print(8, self.row, self.column)
             if not self.in_first('statement'):
                 self.next_alpha()
-        
-        if not self.statement():
-            return False
+
+        stnextlist = self.statement()
+        hquad = self.semantics.H()
+        self.semantics.backpatch(stnextlist, hquad)
 
         while self.alpha == ';':
             if self.alpha == ';':
                 self.next_alpha()
-                    return False
             else:
                 if self.in_first('statement'):
-                    self.errp(22, self.row, self.column)
+                    self.errp.error_print(22, self.row, self.column)
                 else:
                     break
 
-            if not self.statement():
-                return False
-        
+            stnextlist = self.statement()
+            hquad = self.semantics.H()
+            self.semantics.backpatch(stnextlist, hquad)
+
         if self.alpha == 'end':
             self.next_alpha()
-                return False
         else:
-            self.errp(9, self.row, self.column)
+            self.errp.error_print(9, self.row, self.column)
 
-        return True
-
-#lexp
+    # lexp
     def lexp(self):
-        if self.in_first( 'exp'):
-            if not self.exp():
-                return False
-
-            if not self.lop():
-                return False
-
-            if not self.exp():
-                return False
+        if self.in_first('exp'):
+            expplace = self.exp()
+            lopc = self.lop()
+            exp1place = self.exp()
+            arg = {
+                'expplace': expplace,
+                'lopc': lopc,
+                'exp1place': exp1place
+            }
+            truelist, falselist = self.semantics.lexp(0, arg)
 
         elif self.alpha == 'odd':
             self.next_alpha()
-                return False
 
-            if not self.exp():
-                return False
+            expplace = self.exp()
+            arg = {
+                'expplace': expplace,
+            }
+            truelist, falselist = self.semantics.lexp(1, arg)
 
         else:
-            self.errp(10, self.row, self.column)
+            self.errp.error_print(10, self.row, self.column)
 
-        return True
+        return [truelist, falselist]
 
-#exp
+    # exp
     def exp(self):
+        ch = 0
         if self.alpha == '+' or self.alpha == '-':
+            if self.alpha == '-':
+                ch = 1
             self.next_alpha()
-                return False
 
-        if not self.term():
-            return False
+        termplace = self.term()
+        if ch == 1:
+            termplace = '-' + termplace
 
-        while self.in_first( 'aop'):
-            if not self.aop():
-                return False
+        while self.in_first('aop'):
+            aopc = self.aop()
+            term1place = self.term()
+            expplace = self.semantics.newtemp()
+            self.semantics.emit(expplace + ' = ' + termplace + aopc + term1place)
+            termplace = expplace
 
-            if not self.term():
-                return False
+        return termplace
 
-        return True
-
-#statement        
+    # statement
     def statement(self):
         if self.alpha == 'if':
             self.next_alpha()
-                return False
 
-            if not self.lexp():
-                return False
+            truelist, falselist = self.lexp()
 
             if self.alpha == 'then':
                 self.next_alpha()
-                    return False
 
             else:
-                self.errp(11, self.row, self.column)
+                self.errp.error_print(11, self.row, self.column)
                 if not self.in_first('statement'):
                     self.next_alpha()
 
-            if not self.statement():
-                    return False
+            hquad = self.semantics.H()
+            st1nextlist = self.statement()
+            self.semantics.backpatch(truelist, hquad)
 
             if self.alpha == 'else':
                 self.next_alpha()
-                    return False
-
-                if not self.statement():
-                    return False
+                inextlist, h1quad = self.semantics.I()
+                st2nextlist = self.statement()
+                self.semantics.backpatch(falselist, h1quad)
+                stnextlist = self.semantics.merge([st1nextlist, st2nextlist, inextlist])
             else:
-                pass
+                stnextlist = self.semantics.merge([st1nextlist, falselist])
 
-        elif self.in_first( 'id'):
-            self.id()
-                return False
+        elif self.in_first('id'):
+            idname = self.id()
 
             if self.alpha == ':=':
                 self.next_alpha()
-                    return False
             else:
-                self.errp(3, self.row, self.column)
+                self.errp.error_print(3, self.row, self.column)
                 if not self.in_first('exp'):
                     self.next_alpha()
-            
-            if not self.exp():
-                return False
+
+            explist = self.exp()
+            p = self.semantics.lookup(idname)
+            if p is None:
+                self.errp.error_print(23, self.row, self.column)
+            else:
+                self.semantics.emit(p + ' = ' + explist)
+            stnextlist = None
 
         elif self.alpha == 'while':
-            self.next_alpha()                
-                return False
-            
-            if not self.lexp():
-                return False
-
+            self.next_alpha()
+            hquad = self.semantics.H()
+            truelist, falselist = self.lexp()
             if self.alpha == 'do':
-                self.next_alpha()                    
-                    return False
+                self.next_alpha()
             else:
-                self.errp(12, self.row, self.column)
+                self.errp.error_print(12, self.row, self.column)
                 if not self.in_first('statement'):
                     self.next_alpha()
-            
-            if not self.statement():
-                return False
+            h1quad = self.semantics.H()
+            st1nextlist = self.statement()
+            self.semantics.backpatch(st1nextlist, hquad)
+            self.semantics.backpatch(truelist, h1quad)
+            stnextlist = falselist
+            self.semantics.emit('j , - , - , %d' % hquad)
 
         elif self.alpha == 'call':
-            self.next_alpha()                
-                return False
-            
-            self.id()
-                return False
-
+            self.next_alpha()
+            idname = self.id()
             if self.alpha == '(':
                 self.next_alpha()
-                    return False
-
             else:
-                self.errp(6, self.row, self.column)
+                self.errp.error_print(6, self.row, self.column)
                 if not self.in_first('exp') or self.alpha != ')':
                     self.next_alpha()
-
-            if self.in_first( 'exp'):
-                if not self.exp():
-                    return False
-
+            explist = []
+            if self.in_first('exp'):
+                explist.append(self.exp())
                 while True:
                     if self.alpha == ',':
                         self.next_alpha()
-                            return False
                     else:
                         if self.in_first('exp'):
-                            self.errp(22, self.row, self.column)
+                            self.errp.error_print(22, self.row, self.column)
                         else:
                             break
+                    explist.append(self.exp())
 
-                    if not self.exp():
-                        return False
-                
             if self.alpha == ')':
-                self.next_alpha()                    
-                    return False
+                self.next_alpha()
             else:
-                self.errp(7, self.row, self.column)
+                self.errp.error_print(7, self.row, self.column)
+            i = 0
+            for exp in explist:
+                self.semantics.emit('param ' + exp)
+                i += 1
+            self.semantics.emit('call ' + idname + ' ' + str(i))
+            stnextlist = None
 
         elif self.alpha == 'read':
-            self.next_alpha()                                
-                return False
+            self.next_alpha()
 
             if self.alpha == '(':
-                self.next_alpha()                    
-                    return False
+                self.next_alpha()
             else:
-                self.errp(6, self.row, self.column)
+                self.errp.error_print(6, self.row, self.column)
                 if not self.in_first('id'):
                     self.next_alpha()
 
-            self.id()
-                return False
-
+            readid = self.id()
             while True:
                 if self.alpha == ',':
                     self.next_alpha()
-                        return False
                 else:
                     if self.in_first('id'):
-                        self.errp(22, self.row, self.column)
+                        self.errp.error_print(22, self.row, self.column)
                     else:
                         break
-
-                self.id()
-                    return False
+                readid += ', ' + self.id()
 
             if self.alpha == ')':
-                self.next_alpha()                    
-                    return False
+                self.next_alpha()
             else:
-                self.errp(7, self.row, self.column)
+                self.errp.error_print(7, self.row, self.column)
+
+            self.semantics.emit('read ' + readid)
+            stnextlist = None
 
         elif self.alpha == 'write':
-            self.next_alpha()                
-                return False
-
-            if self.alpha =='(':
-                self.next_alpha()                    
-                    return False
+            self.next_alpha()
+            if self.alpha == '(':
+                self.next_alpha()
             else:
-                self.errp(6, self.row, self.column)
+                self.errp.error_print(6, self.row, self.column)
                 if not self.in_first('exp'):
                     self.next_alpha()
 
-            if not self.exp():
-                return False
+            writeexp = self.exp()
 
             while self.alpha == ',':
                 if self.alpha == ',':
                     self.next_alpha()
-                        return False
                 else:
                     if self.in_first('exp'):
-                        self.errp(22, self.row, self.column)
+                        self.errp.error_print(22, self.row, self.column)
                     else:
                         break
-
-                if not self.exp():
-                    return False
+                writeexp += ', ' + self.exp()
 
             if self.alpha == ')':
-                self.next_alpha()                    
-                    return False
+                self.next_alpha()
             else:
-                self.errp(7, self.row, self.column)
+                self.errp.error_print(7, self.row, self.column)
+            self.semantics.emit('write ' + writeexp)
+            stnextlist = None
 
-        elif self.in_first( 'body'):
-            if not self.body():
-                return False
-
+        elif self.in_first('body'):
+            self.body()
+            stnextlist = None
         else:
-            self.errp(13, self.row, self.column)
+            self.errp.error_print(13, self.row, self.column)
+            stnextlist = None
 
-        return True
-    
-#term
+        return stnextlist
+
+    # term
     def term(self):
-        if not self.factor():
-            return False
+        lastplace = self.factor()
+        if lastplace is None:
+            return None
+        while self.in_first('mop'):
+            mopc = self.mop()
+            fac1place = self.factor()
+            if fac1place is None:
+                break
+            termplace = self.newtemp()
+            self.emit(termplace + ' = ' + lastplace + mopc + fac1place)
+            lastplace = termplace
 
-        while self.in_first( 'mop'):
-            if not self.mop():
-                return False
+        return lastplace
 
-            if not self.factor():
-                return False
-        
-        return True
-
-#factor        
+    # factor
     def factor(self):
-        if self.in_first( 'id'):
-            self.id()
-                return False
+        if self.in_first('id'):
+            idname = self.id()
+            p = self.semantics.lookup(idname)
+            if p is None:
+                return None
+            else:
+                return p
 
-        elif self.in_first( 'integer'):
-            if not self.integer():
-               return False
+        elif self.in_first('integer'):
+            intc = self.integer()
+            return str(intc)
 
         elif self.alpha == '(':
-            self.next_alpha()                
-                return False
-
-            if not self.exp():
-               return False
-
+            self.next_alpha()
+            expplace = self.exp()
             if self.alpha == ')':
-                self.next_alpha()                    
-                    return False
+                self.next_alpha()
             else:
-                self.errp(7, self.row, self.column)
+                self.errp.error_print(7, self.row, self.column)
+            return expplace
+
         else:
-            self.errp(14, self.row, self.column)
+            self.errp.error_print(14, self.row, self.column)
+            return None
 
-        return True
-
-#lop
+    # lop
     def lop(self):
-        lopList = ['=', '<>', '<', '<=', '>', '>=']
-        if self.alpha in lopList:
-            self.next_alpha()                
-                return False
-
+        if self.alpha in self.lopList:
+            lopc = self.alpha
+            self.next_alpha()
         else:
-            self.errp(15, self.row, self.column)
+            self.errp.error_print(15, self.row, self.column)
 
-        return True
+        return lopc
 
-#aop
+    # aop
     def aop(self):
-        aopList = ['+', '-']
-        if self.alpha in aopList:
-            self.next_alpha()                
-                return False
+        if self.alpha in self.aopList:
+            aopc = self.alpha
+            self.next_alpha()
         else:
-            self.errp(16, self.row, self.column)
+            self.errp.error_print(16, self.row, self.column)
+        return aopc
 
-        return True
-
-#mop
+    # mop
     def mop(self):
-        mopList = ['*', '/']
-        if self.alpha in mopList:
-            self.next_alpha()                
-                return False
+        if self.alpha in self.mopList:
+            mopc = self.alpha
+            self.next_alpha()
         else:
-            self.errp(17, self.row, self.column)
-        
-        return True
+            self.errp.error_print(17, self.row, self.column)
 
-#id
+        return mopc
+
+    # id
     def id(self):
         for index, char in enumerate(self.alpha):
             if index == 0:
                 if (char <= 'Z' and char >= 'A') or (char <= 'z' and char >= 'a'):
                     pass
                 else:
-                    self.errp(18, self.row, self.column)
+                    self.errp.error_print(18, self.row, self.column)
             else:
                 if (char <= 'Z' and char >= 'A') or (char <= 'z' and char >= 'a'):
                     pass
                 elif (char <= '9' and char >= '0'):
                     pass
                 else:
-                    self.errp(19, self.row, self.column)
+                    self.errp.error_print(19, self.row, self.column)
+                    return None
+        idname = self.alpha
+        self.next_alpha()
+        return idname
 
-        self.next_alpha()            
-            return False
-
-        return True
-    
-#integer
+    # integer
     def integer(self):
         for char in self.alpha:
             if (char <= '9' and char >= '0'):
                 pass
             else:
-                self.errp(20, self.row, self.column)
+                self.errp.error_print(20, self.row, self.column)
+                return None
 
-        self.next_alpha()            
-            return False
-
-        return True
+        intc = self.alpha
+        self.next_alpha()
+        return intc

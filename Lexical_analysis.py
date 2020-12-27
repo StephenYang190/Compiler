@@ -11,10 +11,7 @@ def errorProcess(t, row, column, char = ''):
 def LexicalAnalysis(line, row, column):
     state = 0
     anaFinish = False
-    
     symbolList = [',', '/', '*', '+', '-', '=', '(', ')', ';']
-
-    print('Star getting word.')    
     while column < len(line):
         char = line[column]
 
@@ -103,7 +100,5 @@ def LexicalAnalysis(line, row, column):
                 column = column + 1
         if anaFinish:
             break
-
-    print('Get : ', word)
 
     return word, column
