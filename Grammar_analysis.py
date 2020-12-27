@@ -72,7 +72,6 @@ class Analysis:
             if not self.in_first('block'):
                 self.next_alpha()
         self.semantics.M(idname)
-        self.semantics.tbmng.setquad(self.semantics.nextquad)
         self.block()
         self.semantics.prog(idname)
 
@@ -87,6 +86,7 @@ class Analysis:
         if self.in_first('proc'):
             self.proc()
 
+        self.semantics.tbmng.setquad(self.semantics.nextquad)
         self.body()
         return True
 
@@ -206,7 +206,6 @@ class Analysis:
             if not self.in_first('block'):
                 self.next_alpha()
 
-        self.semantics.tbmng.setquad(self.semantics.nextquad)
         self.block()
         while True:
             if self.alpha == ';':
