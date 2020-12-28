@@ -4,14 +4,14 @@ var j,sum,x;
 	procedure suml(x);
 	var j;
 	begin
-		j:=1;
+		j:=10;
 		sum:=0;
 		while j<=x do
 		begin
 			sum:=sum+j;
 			j:=j+1
 		end;
-		write(sum)
+		write(sum, a)
 	end
 begin
 	read(x);

@@ -28,3 +28,13 @@ class stack:
 
     def set(self, index, value):
         self.param[index] = value
+        print()
+
+    def prints(self):
+        stack = ""
+        for i in self.param:
+            stack += ' %d' % i
+        return stack
+
+    def __getitem__(self, i):
+        return self.param[i]

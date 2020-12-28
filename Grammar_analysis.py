@@ -72,11 +72,17 @@ class Analysis:
             if not self.in_first('block'):
                 self.next_alpha()
         self.semantics.M(idname)
-        self.block()
+        self.block(idname)
         self.semantics.prog(idname)
 
+        arg = {
+            'mcode': self.semantics.mcode,
+            'tbmng': self.semantics.tbmng
+        }
+        return arg
+
     # block
-    def block(self):
+    def block(self, idname):
         if self.in_first('condecl'):
             self.condecl()
 
@@ -85,9 +91,11 @@ class Analysis:
 
         if self.in_first('proc'):
             self.proc()
-
-        self.semantics.tbmng.setquad(self.semantics.nextquad)
+        hquad = self.semantics.H()
+        self.semantics.tbmng.setquad(hquad)
+        self.semantics.emit("%s" % idname)
         self.body()
+        self.semantics.emit("end")
         return True
 
     # condecl
@@ -206,7 +214,7 @@ class Analysis:
             if not self.in_first('block'):
                 self.next_alpha()
 
-        self.block()
+        self.block(idname)
         while True:
             if self.alpha == ';':
                 self.next_alpha()
@@ -295,7 +303,7 @@ class Analysis:
             aopc = self.aop()
             term1place = self.term()
             expplace = self.semantics.newtemp()
-            self.semantics.emit(expplace + ' = ' + termplace + aopc + term1place)
+            self.semantics.emit('%s = %s %s %s' % (expplace, termplace, aopc, term1place))
             termplace = expplace
 
         return termplace
@@ -361,7 +369,7 @@ class Analysis:
             self.semantics.backpatch(st1nextlist, hquad)
             self.semantics.backpatch(truelist, h1quad)
             stnextlist = falselist
-            self.semantics.emit('j , - , - , %d' % hquad)
+            self.semantics.emit('j  -  -  %d' % hquad)
 
         elif self.alpha == 'call':
             self.next_alpha()
@@ -393,7 +401,8 @@ class Analysis:
             for exp in explist:
                 self.semantics.emit('param ' + exp)
                 i += 1
-            self.semantics.emit('call ' + idname + ' ' + str(i))
+            l = self.semantics.tbmng.level(idname)
+            self.semantics.emit('call %s %d %d' % (idname, i, l))
             stnextlist = None
 
         elif self.alpha == 'read':
@@ -415,13 +424,14 @@ class Analysis:
                         self.errp.error_print(22, self.row, self.column)
                     else:
                         break
-                readid += ', ' + self.id()
+                readid += ' ' + self.id()
 
             if self.alpha == ')':
                 self.next_alpha()
             else:
                 self.errp.error_print(7, self.row, self.column)
 
+            readid = "".join(self.semantics.lookup(id) for id in readid)
             self.semantics.emit('read ' + readid)
             stnextlist = None
 
@@ -444,7 +454,7 @@ class Analysis:
                         self.errp.error_print(22, self.row, self.column)
                     else:
                         break
-                writeexp += ', ' + self.exp()
+                writeexp += ' ' + self.exp()
 
             if self.alpha == ')':
                 self.next_alpha()
@@ -473,7 +483,7 @@ class Analysis:
             if fac1place is None:
                 break
             termplace = self.newtemp()
-            self.emit(termplace + ' = ' + lastplace + mopc + fac1place)
+            self.semantics.emit('%s = %s %s %s' % (termplace, lastplace, mopc, fac1place))
             lastplace = termplace
 
         return lastplace

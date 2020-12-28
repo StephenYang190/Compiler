@@ -6,72 +6,160 @@ class interpreter:
         self.codes = codes
         self.stack = stack()
         #present code
-        self.I = None
+        self.I = 0
         #top of stack
         self.T = None
         #sp
-        self.B = None
+        self.B = 0
         #next code
         self.P = None
+        self.push(0)
+        self.push(0)
+        self.push(-1)
+        self.push(0)
 
     def LIT(self, l, a):
-        self.stack.push(a)
-        if self.T is None:
-            self.T = 0
-        else:
-            self.T += 1
+        self.push(a)
+        self.P = self.I + 1
 
     def OPR(self, l, a):
-        num1 = self.stack[self.T]
-        num2 = self.stack[self.T - 1]
+        if a == '6':
+            num1 = self.pop()
+            if num1 % 2:
+                self.push(1)
+            else:
+                self.push(0)
+            self.P = self.I + 1
+        elif a == '0':
+            self.P = self.stack[self.B + 2]
+        else:
+            num1 = self.pop()
+            num2 = self.pop()
+            if a == '2':
+                self.push(num1 + num2)
+            elif a == '3':
+                self.push(num1 - num2)
+            elif a == '4':
+                self.push(num1 * num2)
+            elif a == '5':
+                self.push(num1 / num2)
+            elif a == '8':
+                if num1 == num2:
+                    self.push(1)
+                else:
+                    self.push(0)
+            elif a == '9':
+                if num1 != num2:
+                    self.push(1)
+                else:
+                    self.push(0)
+            elif a == '10':
+                if num1 < num2:
+                    self.push(1)
+                else:
+                    self.push(0)
+            elif a == '11':
+                if num1 >= num2:
+                    self.push(1)
+                else:
+                    self.push(0)
+            elif a == '12':
+                if num1 > num2:
+                    self.push(1)
+                else:
+                    self.push(0)
+            elif a == '13':
+                if num1 <= num2:
+                    self.push(1)
+                else:
+                    self.push(0)
+            self.P = self.I + 1
+
 
     def LOD(self, l, a):
         add = self.B
         while l > 0:
             add = self.stack[add]
             l -= 1
-        self.stack.push(self.stack[add + a])
+        self.push(self.stack[add + a + 4 + self.stack[add + 3]])
+        self.P = self.I + 1
 
     def STO(self, l, a):
         add = self.B
         while l > 0:
             add = self.stack[add]
             l -= 1
-        self.stack.set(add + a, self.stack.top())
+        value = self.pop()
+        self.stack.set(add + a + 4 + self.stack[add + 3], value)
+        self.P = self.I + 1
 
     def CAL(self, l, a):
-        return True
+        if l == '1':
+            self.push(self.B)
+        else:
+            self.push(self.stack[self.B])
+        self.B = self.T
+        self.push(self.B)
+        self.push(self.I + 1)
+        self.P = self.I + 1
 
     def INT(self, l, a):
-        self.B = self.T + 1
-        self.T += a
+        k = self.stack[self.T]
+        for i in range(k, -1, -1):
+            self.push(self.stack[self.B - i])
+        for i in range(a - k - 4):
+            self.push(0)
+        self.T = self.B + a
+        self.P = self.I + 1
 
     def JMP(self, l, a):
-        self.P = a
+        self.P = int(a)
 
     def JPC(self, l, a):
         if self.stack[self.T] == 1:
-            self.P = a
+            self.P = int(a)
         else:
             self.P = self.I + 1
 
     def RED(self, l, a):
-        x = input()
-        add = self.B
-        while l > 0:
-            add = self.stack[add]
-            l -= 1
-        self.stack.set(add + a, x)
+        x = input('enter : ')
+        x = int(x)
+        self.push(x)
+        self.STO(l, a)
+        self.P = self.I + 1
 
     def WRT(self, l, a):
         print(self.stack[self.T])
+        self.P = self.I + 1
 
     def getFun(self, f):
         fun = getattr(self, f, None)
+        return fun
 
     def forward(self):
         while True:
             F, L, A = self.codes[self.I].split()
+            L = int(L)
+            A = int(A)
             fun = self.getFun(F)
             fun(L, A)
+            stack = self.stack.prints()
+            print("%s : %s" % (self.codes[self.I], stack))
+            print("T %s : B %s" % (self.T, self.B))
+            self.I = self.P
+            if self.P == -1:
+                break
+        print('End')
 
+    def push(self, value):
+        if self.T is None:
+            self.T = 0
+            self.stack.push(value)
+        else:
+            self.T += 1
+            self.stack.push(value)
+
+    def pop(self):
+        value = self.stack.pop()
+        self.T -= 1
+        return value

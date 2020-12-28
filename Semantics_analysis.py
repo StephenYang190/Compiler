@@ -60,13 +60,12 @@ class Semantics_analysis:
         t = self.tbmng.top()
         t.enter(idname, 'const', self.offset.top(), integerc)
         idplace = self.lookup(idname)
-        self.emit(idplace + ' = ' + str(integerc))
         self.offset.add(4)
 
-    def vardecl(self, Aidlist):
+    def vardecl(self, Aidlist, type='var'):
         t = self.tbmng.top()
         for idname in Aidlist:
-            t.enter(idname, 'var', self.offset.top())
+            t.enter(idname, type, self.offset.top())
             self.offset.add(4)
 
     def proc(self, idname):
@@ -101,7 +100,7 @@ class Semantics_analysis:
             if p is None:
                 print('Error')
             else:
-                self.emit(arg['idname'] + '=' + arg['expplace'])
+                self.emit(arg['idname'] + ' = ' + arg['expplace'])
         elif ch == 1:
             self.backpatch(arg['letruelist'], arg['hquad'])
             nextlist = arg['lefalselist'] + arg['st1nextlist']

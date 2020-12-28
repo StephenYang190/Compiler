@@ -25,7 +25,9 @@ class table:
         self.items.append(Item(name, t, offset, value))
 
     def addwidth(self, offset):
-        self.width = offset
+        for item in self.items:
+            if item.type == 'var':
+                self.width += 1
 
     def setquad(self, quad):
         self.quad = quad
@@ -36,15 +38,19 @@ class table:
     def lookup(self, idname):
         for index, item in enumerate(self.items):
             if idname == item.name:
-                return idname + '|' + str(index) + '|0'
+                if item.type == 'const':
+                    return idname + '|c|' + str(item.value)
+                return idname + '|v|' + str(index) + '|0'
         if self.previous is None:
             return None
         index = self.previous.lookup(idname)
         if index is not None:
-            l = index[-1]
-            l = str(int(l) + 1)
-            index = index[:-1] + l
-
+            if index.split('|')[1] == 'c':
+                return index
+            else:
+                l = index[-1]
+                l = str(int(l) + 1)
+                index = index[:-1] + l
         return index
 
     def printable(self):
@@ -64,11 +70,14 @@ class table_manager:
     def __init__(self):
         self.tblpter = stack()
         self.tblpter_back = []
+        self.first_tb = None
 
     def mktable(self, pre, idname, layer):
         newt = table(pre, layer, idname)
         self.tblpter.push(newt)
         self.tblpter_back.append(newt)
+        if self.first_tb is None:
+            self.first_tb = idname
         return newt
 
     def top(self):
@@ -80,4 +89,26 @@ class table_manager:
     def setquad(self, quad):
         t = self.tblpter.top()
         t.setquad(quad)
+
+    def tbval(self, idname):
+        for t in self.tblpter_back:
+            if t.name == idname:
+                return t.width
+
+    def iterlist(self):
+        return self.tblpter_back
+
+    def level(self, idname):
+        for t in self.tblpter_back:
+            if t.name == idname:
+                return t.level - self.tblpter.top().level
+
+    def probegin(self, idname):
+        for t in self.tblpter_back:
+            if t.name == idname:
+                return t.quad
+
+    def first(self):
+        return self.first_tb
+
 
