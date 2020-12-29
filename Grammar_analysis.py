@@ -11,6 +11,7 @@ class Analysis:
         self.row = 0
         self.column = 0
         self.anaf = False
+        self.error = False
         self.semantics = Semantics_analysis()
 
         self.gram = Grammer(FirstPath)
@@ -57,18 +58,18 @@ class Analysis:
             self.next_alpha()
         else:
             if self.alpha in 'program':
-                self.errp.error_print(21, self.row, self.column)
+                self.errorStop(21)
                 self.next_alpha()
             elif not self.in_first('id'):
-                self.errp.error_print(1, self.row, self.column)
+                self.errorStop(1)
                 self.next_alpha()
             else:
-                self.errp.error_print(1, self.row, self.column)
+                self.errorStop(1)
         idname = self.id()
         if self.alpha == ';':
             self.next_alpha()
         else:
-            self.errp.error_print(0, self.row, self.column)
+            self.errorStop(0)
             if not self.in_first('block'):
                 self.next_alpha()
         self.semantics.M(idname)
@@ -77,7 +78,8 @@ class Analysis:
 
         arg = {
             'mcode': self.semantics.mcode,
-            'tbmng': self.semantics.tbmng
+            'tbmng': self.semantics.tbmng,
+            'stop': self.error
         }
         return arg
 
@@ -103,7 +105,7 @@ class Analysis:
         if self.alpha == 'const':
             self.next_alpha()
         else:
-            self.errp.error_print(2, self.row, self.column)
+            self.errorStop(2)
             if not self.in_first('const'):
                 self.next_alpha()
 
@@ -112,7 +114,7 @@ class Analysis:
         while True:
             if self.alpha != ',':
                 if self.in_first('const'):
-                    self.errp.error_print(22, self.row, self.column)
+                    self.errorStop(22)
                 else:
                     break
             else:
@@ -123,7 +125,7 @@ class Analysis:
         if self.alpha == ';':
             self.next_alpha()
         else:
-            self.errp.error_print(0, self.row, self.column)
+            self.errorStop(0)
 
     # const
     def const(self):
@@ -131,7 +133,7 @@ class Analysis:
         if self.alpha == ':=':
             self.next_alpha()
         else:
-            self.errp.error_print(3, self.row, self.column)
+            self.errorStop(3)
 
         intc = self.integer()
         self.semantics.const(idname, intc)
@@ -141,7 +143,7 @@ class Analysis:
         if self.alpha == 'var':
             self.next_alpha()
         else:
-            self.errp.error_print(4, self.row, self.column)
+            self.errorStop(4)
             if not self.in_first('id'):
                 self.next_alpha()
 
@@ -152,7 +154,7 @@ class Analysis:
                 self.next_alpha()
             else:
                 if self.in_first('id'):
-                    self.errp.error_print(22, self.row, self.column)
+                    self.errorStop(22)
                 else:
                     break
 
@@ -161,7 +163,7 @@ class Analysis:
         if self.alpha == ';':
             self.next_alpha()
         else:
-            self.errp.error_print(0, self.row, self.column)
+            self.errorStop(0)
 
         self.semantics.vardecl(idlist)
 
@@ -171,7 +173,7 @@ class Analysis:
         if self.alpha == 'procedure':
             self.next_alpha()
         else:
-            self.errp.error_print(5, self.row, self.column)
+            self.errorStop(5)
             if not self.in_first('id'):
                 self.next_alpha()
 
@@ -181,7 +183,7 @@ class Analysis:
         if self.alpha == '(':
             self.next_alpha()
         else:
-            self.errp.error_print(6, self.row, self.column)
+            self.errorStop(6)
             if not self.in_first('id') or self.alpha != ')':
                 self.next_alpha()
 
@@ -193,7 +195,7 @@ class Analysis:
                     self.next_alpha()
                 else:
                     if self.in_first('id'):
-                        self.errp.error_print(22, self.row, self.column)
+                        self.errorStop(22)
                     else:
                         break
 
@@ -202,7 +204,7 @@ class Analysis:
         if self.alpha == ')':
             self.next_alpha()
         else:
-            self.errp.error_print(7, self.row, self.column)
+            self.errorStop(7)
             if self.alpha != ';':
                 self.next_alpha()
         self.semantics.vardecl(idlist)
@@ -210,7 +212,7 @@ class Analysis:
         if self.alpha == ';':
             self.next_alpha()
         else:
-            self.errp.error_print(0, self.row, self.column)
+            self.errorStop(0)
             if not self.in_first('block'):
                 self.next_alpha()
 
@@ -220,7 +222,7 @@ class Analysis:
                 self.next_alpha()
             else:
                 if self.in_first('proc'):
-                    self.errp.error_print(22, self.row, self.column)
+                    self.errorStop(22)
                 else:
                     break
 
@@ -234,7 +236,7 @@ class Analysis:
         if self.alpha == 'begin':
             self.next_alpha()
         else:
-            self.errp.error_print(8, self.row, self.column)
+            self.errorStop(8)
             if not self.in_first('statement'):
                 self.next_alpha()
 
@@ -247,7 +249,7 @@ class Analysis:
                 self.next_alpha()
             else:
                 if self.in_first('statement'):
-                    self.errp.error_print(22, self.row, self.column)
+                    self.errorStop(22)
                 else:
                     break
 
@@ -258,7 +260,7 @@ class Analysis:
         if self.alpha == 'end':
             self.next_alpha()
         else:
-            self.errp.error_print(9, self.row, self.column)
+            self.errorStop(9)
 
     # lexp
     def lexp(self):
@@ -283,7 +285,7 @@ class Analysis:
             truelist, falselist = self.semantics.lexp(1, arg)
 
         else:
-            self.errp.error_print(10, self.row, self.column)
+            self.errorStop(10)
 
         return [truelist, falselist]
 
@@ -319,7 +321,7 @@ class Analysis:
                 self.next_alpha()
 
             else:
-                self.errp.error_print(11, self.row, self.column)
+                self.errorStop(11)
                 if not self.in_first('statement'):
                     self.next_alpha()
 
@@ -342,14 +344,14 @@ class Analysis:
             if self.alpha == ':=':
                 self.next_alpha()
             else:
-                self.errp.error_print(3, self.row, self.column)
+                self.errorStop(3)
                 if not self.in_first('exp'):
                     self.next_alpha()
 
             explist = self.exp()
             p = self.semantics.lookup(idname)
             if p is None:
-                self.errp.error_print(23, self.row, self.column)
+                self.errorStop(23)
             else:
                 self.semantics.emit(p + ' = ' + explist)
             stnextlist = None
@@ -361,7 +363,7 @@ class Analysis:
             if self.alpha == 'do':
                 self.next_alpha()
             else:
-                self.errp.error_print(12, self.row, self.column)
+                self.errorStop(12)
                 if not self.in_first('statement'):
                     self.next_alpha()
             h1quad = self.semantics.H()
@@ -377,7 +379,7 @@ class Analysis:
             if self.alpha == '(':
                 self.next_alpha()
             else:
-                self.errp.error_print(6, self.row, self.column)
+                self.errorStop(6)
                 if not self.in_first('exp') or self.alpha != ')':
                     self.next_alpha()
             explist = []
@@ -388,7 +390,7 @@ class Analysis:
                         self.next_alpha()
                     else:
                         if self.in_first('exp'):
-                            self.errp.error_print(22, self.row, self.column)
+                            self.errorStop(22)
                         else:
                             break
                     explist.append(self.exp())
@@ -396,7 +398,7 @@ class Analysis:
             if self.alpha == ')':
                 self.next_alpha()
             else:
-                self.errp.error_print(7, self.row, self.column)
+                self.errorStop(7)
             i = 0
             for exp in explist:
                 self.semantics.emit('param ' + exp)
@@ -411,7 +413,7 @@ class Analysis:
             if self.alpha == '(':
                 self.next_alpha()
             else:
-                self.errp.error_print(6, self.row, self.column)
+                self.errorStop(6)
                 if not self.in_first('id'):
                     self.next_alpha()
 
@@ -421,7 +423,7 @@ class Analysis:
                     self.next_alpha()
                 else:
                     if self.in_first('id'):
-                        self.errp.error_print(22, self.row, self.column)
+                        self.errorStop(22)
                     else:
                         break
                 readid += ' ' + self.id()
@@ -429,7 +431,7 @@ class Analysis:
             if self.alpha == ')':
                 self.next_alpha()
             else:
-                self.errp.error_print(7, self.row, self.column)
+                self.errorStop(7)
 
             readid = "".join(self.semantics.lookup(id) for id in readid)
             self.semantics.emit('read ' + readid)
@@ -440,7 +442,7 @@ class Analysis:
             if self.alpha == '(':
                 self.next_alpha()
             else:
-                self.errp.error_print(6, self.row, self.column)
+                self.errorStop(6)
                 if not self.in_first('exp'):
                     self.next_alpha()
 
@@ -451,7 +453,7 @@ class Analysis:
                     self.next_alpha()
                 else:
                     if self.in_first('exp'):
-                        self.errp.error_print(22, self.row, self.column)
+                        self.errorStop(22)
                     else:
                         break
                 writeexp += ' ' + self.exp()
@@ -459,7 +461,7 @@ class Analysis:
             if self.alpha == ')':
                 self.next_alpha()
             else:
-                self.errp.error_print(7, self.row, self.column)
+                self.errorStop(7)
             self.semantics.emit('write ' + writeexp)
             stnextlist = None
 
@@ -467,7 +469,7 @@ class Analysis:
             self.body()
             stnextlist = None
         else:
-            self.errp.error_print(13, self.row, self.column)
+            self.errorStop(13)
             stnextlist = None
 
         return stnextlist
@@ -508,11 +510,11 @@ class Analysis:
             if self.alpha == ')':
                 self.next_alpha()
             else:
-                self.errp.error_print(7, self.row, self.column)
+                self.errorStop(7)
             return expplace
 
         else:
-            self.errp.error_print(14, self.row, self.column)
+            self.errorStop(14)
             return None
 
     # lop
@@ -521,7 +523,7 @@ class Analysis:
             lopc = self.alpha
             self.next_alpha()
         else:
-            self.errp.error_print(15, self.row, self.column)
+            self.errorStop(15)
 
         return lopc
 
@@ -531,7 +533,7 @@ class Analysis:
             aopc = self.alpha
             self.next_alpha()
         else:
-            self.errp.error_print(16, self.row, self.column)
+            self.errorStop(16)
         return aopc
 
     # mop
@@ -540,7 +542,7 @@ class Analysis:
             mopc = self.alpha
             self.next_alpha()
         else:
-            self.errp.error_print(17, self.row, self.column)
+            self.errorStop(17)
 
         return mopc
 
@@ -551,14 +553,14 @@ class Analysis:
                 if (char <= 'Z' and char >= 'A') or (char <= 'z' and char >= 'a'):
                     pass
                 else:
-                    self.errp.error_print(18, self.row, self.column)
+                    self.errorStop(18)
             else:
                 if (char <= 'Z' and char >= 'A') or (char <= 'z' and char >= 'a'):
                     pass
                 elif (char <= '9' and char >= '0'):
                     pass
                 else:
-                    self.errp.error_print(19, self.row, self.column)
+                    self.errorStop(19)
                     return None
         idname = self.alpha
         self.next_alpha()
@@ -570,9 +572,13 @@ class Analysis:
             if (char <= '9' and char >= '0'):
                 pass
             else:
-                self.errp.error_print(20, self.row, self.column)
+                self.errorStop(20)
                 return None
 
         intc = self.alpha
         self.next_alpha()
         return intc
+
+    def errorStop(self, ch):
+        self.errp.error_print(ch, self.row, self.column)
+        self.error = True

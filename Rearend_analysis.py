@@ -89,6 +89,7 @@ class rear_analysis:
                     self.genNum(num1)
                     num2 = mcodes[4]
                     self.genNum(num2)
+                    self.gencode('OPR 0 %s' % self.op[mcodes[3]])
                     self.genSTO(mcodes[0])
         self.backpatch()
         return self.codes
@@ -108,7 +109,7 @@ class rear_analysis:
 
     def genSTO(self, tar):
         if '|' in tar:
-            self.gencode('STO %s %s' % (tar.split('|')[2], tar.split('|')[3]))
+            self.gencode('STO %s %s' % (tar.split('|')[3], tar.split('|')[2]))
         else:
             pass
 

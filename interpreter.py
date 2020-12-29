@@ -23,52 +23,60 @@ class interpreter:
         self.P = self.I + 1
 
     def OPR(self, l, a):
-        if a == '6':
+        if a == 6:
             num1 = self.pop()
             if num1 % 2:
                 self.push(1)
             else:
                 self.push(0)
             self.P = self.I + 1
-        elif a == '0':
+        elif a == 0:
+            k = self.stack[self.B + 3]
+            orib = self.B
             self.P = self.stack[self.B + 2]
+            self.I = self.stack[self.B + 2]
+            self.B = self.stack[self.B + 1]
+            while self.T != orib:
+                self.pop()
+            for i in range(k + 1):
+                self.pop()
         else:
-            num1 = self.pop()
             num2 = self.pop()
-            if a == '2':
+            num1 = self.pop()
+            if a == 2:
                 self.push(num1 + num2)
-            elif a == '3':
+            elif a == 3:
                 self.push(num1 - num2)
-            elif a == '4':
+            elif a == 4:
                 self.push(num1 * num2)
-            elif a == '5':
+            elif a == 5:
                 self.push(num1 / num2)
-            elif a == '8':
+            elif a == 8:
                 if num1 == num2:
                     self.push(1)
                 else:
                     self.push(0)
-            elif a == '9':
+            elif a == 9:
                 if num1 != num2:
                     self.push(1)
                 else:
                     self.push(0)
-            elif a == '10':
+            elif a == 10:
                 if num1 < num2:
                     self.push(1)
                 else:
                     self.push(0)
-            elif a == '11':
+            elif a == 11:
                 if num1 >= num2:
                     self.push(1)
                 else:
                     self.push(0)
-            elif a == '12':
+            elif a == 12:
                 if num1 > num2:
                     self.push(1)
                 else:
                     self.push(0)
-            elif a == '13':
+            elif a == 13:
                 if num1 <= num2:
                     self.push(1)
                 else:
@@ -81,7 +89,7 @@ class interpreter:
         while l > 0:
             add = self.stack[add]
             l -= 1
-        self.push(self.stack[add + a + 4 + self.stack[add + 3]])
+        self.push(self.stack[add + a + 3 + self.stack[add + 3]])
         self.P = self.I + 1
 
     def STO(self, l, a):
@@ -90,7 +98,8 @@ class interpreter:
             add = self.stack[add]
             l -= 1
         value = self.pop()
-        self.stack.set(add + a + 4 + self.stack[add + 3], value)
+        set = add + a + 3 + self.stack[add + 3]
+        self.stack.set(add + a + 3 + self.stack[add + 3], value)
         self.P = self.I + 1
 
     def CAL(self, l, a):
@@ -98,18 +107,18 @@ class interpreter:
             self.push(self.B)
         else:
             self.push(self.stack[self.B])
-        self.B = self.T
         self.push(self.B)
-        self.push(self.I + 1)
+        self.B = self.T - 1
+        self.push(self.I + 3)
         self.P = self.I + 1
 
     def INT(self, l, a):
         k = self.stack[self.T]
-        for i in range(k, -1, -1):
-            self.push(self.stack[self.B - i])
+        for i in range(k):
+            self.push(self.stack[self.B- k + i])
         for i in range(a - k - 4):
             self.push(0)
-        self.T = self.B + a
+        self.T = self.B + a - 1
         self.P = self.I + 1
 
     def JMP(self, l, a):
@@ -129,7 +138,10 @@ class interpreter:
         self.P = self.I + 1
 
     def WRT(self, l, a):
-        print(self.stack[self.T])
+        value = self.pop()
+        print()
+        print("output: %s" % value)
+        print()
         self.P = self.I + 1
 
     def getFun(self, f):
@@ -145,10 +157,11 @@ class interpreter:
             fun(L, A)
             stack = self.stack.prints()
             print("%s : %s" % (self.codes[self.I], stack))
-            print("T %s : B %s" % (self.T, self.B))
+            # print("T %s : B %s" % (self.T, self.B))
             self.I = self.P
             if self.P == -1:
                 break
+            # input('wait')
         print('End')
 
     def push(self, value):

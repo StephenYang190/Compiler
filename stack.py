@@ -28,7 +28,6 @@ class stack:
 
     def set(self, index, value):
         self.param[index] = value
-        print()
 
     def prints(self):
         stack = ""

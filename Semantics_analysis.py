@@ -28,8 +28,10 @@ class Semantics_analysis:
 
     def merge(self, lists):
         l = []
-        for list in lists:
-            l = l + list
+        for lst in lists:
+            if lst is None:
+                continue
+            l = l + lst
 
         l = list(set(l))
         return l
@@ -40,13 +42,13 @@ class Semantics_analysis:
         self.tbmng.pop()
         self.offset.pop()
 
-        for index, code in enumerate(self.mcode):
-            print('%d : %s' % (index, code))
-
-        print()
-        for t in self.tbmng.tblpter_back:
-            t.printable()
-            print()
+        # for index, code in enumerate(self.mcode):
+        #     print('%d : %s' % (index, code))
+        #
+        # print()
+        # for t in self.tbmng.tblpter_back:
+        #     t.printable()
+        #     print()
 
     def M(self, idname):
         t = self.mktable(None, idname)
