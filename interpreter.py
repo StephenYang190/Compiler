@@ -156,7 +156,7 @@ class interpreter:
             fun = self.getFun(F)
             fun(L, A)
             stack = self.stack.prints()
-            print("%s : %s" % (self.codes[self.I], stack))
+            # print("%s : %s" % (self.codes[self.I], stack))
             # print("T %s : B %s" % (self.T, self.B))
             self.I = self.P
             if self.P == -1:
