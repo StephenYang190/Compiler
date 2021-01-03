@@ -1,84 +1,60 @@
-0 : fib
-1 : sum|v|1|0 = 0
-2 : j< x|v|0|0 2 4
-3 : j - - 6
-4 : return|v|1|1 = x|v|0|0
-5 : j - - 17
-6 : t0 = x|v|0|0 - 1
-7 : param t0
-8 : call fib 1 0
-9 : t1 = sum|v|1|0 + return|v|1|1
-10 : sum|v|1|0 = t1
-11 : t2 = x|v|0|0 - 2
-12 : param t2
-13 : call fib 1 0
-14 : t3 = sum|v|1|0 + return|v|1|1
-15 : sum|v|1|0 = t3
-16 : return|v|1|1 = sum|v|1|0
-17 : end
-18 : fibonacci
-19 : i|v|2|0 = 1
-20 : j<= i|v|2|0 index|c|30 22
-21 : j - - 28
-22 : param i|v|2|0
-23 : call fib 1 1
-24 : write return|v|1|0
-25 : t4 = i|v|2|0 + 1
-26 : i|v|2|0 = t4
-27 : j  -  -  20
-28 : end
-0 : JMP 0 35
+0 : suml
+1 : j|v|1|0 = 10
+2 : sum|v|2|1 = 0
+3 : j<= j|v|1|0 x|v|0|0 5
+4 : j - - 10
+5 : t0 = sum|v|2|1 + j|v|1|0
+6 : sum|v|2|1 = t0
+7 : t1 = j|v|1|0 + 1
+8 : j|v|1|0 = t1
+9 : j  -  -  3
+10 : write sum|v|2|1 a|c|5
+11 : end
+12 : xi
+13 : read x|v|3|0
+14 : write x|v|3|0
+15 : read j|v|1|0
+16 : write j|v|1|0
+17 : param j|v|1|0
+18 : call suml 1 1
+19 : write j|v|1|0
+20 : end
+0 : JMP 0 25
 1 : INT 0 6
-2 : LIT 0 0
+2 : LIT 0 10
 3 : STO 0 1
-4 : LOD 0 0
-5 : LIT 0 2
-6 : OPR 0 10
-7 : JPC 0 9
-8 : JMP 0 12
-9 : LOD 0 0
-10 : STO 1 1
-11 : JMP 0 34
-12 : LOD 0 0
-13 : LIT 0 1
-14 : OPR 0 3
-15 : CAL 0 1
+4 : LIT 0 0
+5 : STO 1 2
+6 : LOD 0 1
+7 : LOD 0 0
+8 : OPR 0 13
+9 : JPC 0 11
+10 : JMP 0 20
+11 : LOD 1 2
+12 : LOD 0 1
+13 : OPR 0 2
+14 : STO 1 2
+15 : LOD 0 1
 16 : LIT 0 1
-17 : JMP 0 1
-18 : LOD 0 1
-19 : LOD 1 1
-20 : OPR 0 2
-21 : STO 0 1
-22 : LOD 0 0
-23 : LIT 0 2
-24 : OPR 0 3
-25 : CAL 0 1
-26 : LIT 0 1
-27 : JMP 0 1
-28 : LOD 0 1
-29 : LOD 1 1
-30 : OPR 0 2
-31 : STO 0 1
+17 : OPR 0 2
+18 : STO 0 1
+19 : JMP 0 6
+20 : LOD 1 2
+21 : WRT 0 0
+22 : LIT 0 5
+23 : WRT 0 0
+24 : OPR 0 0
+25 : INT 0 7
+26 : RED 0 3
+27 : LOD 0 3
+28 : WRT 0 0
+29 : RED 0 1
+30 : LOD 0 1
+31 : WRT 0 0
 32 : LOD 0 1
-33 : STO 1 1
-34 : OPR 0 0
-35 : INT 0 6
-36 : LIT 0 1
-37 : STO 0 2
-38 : LOD 0 2
-39 : LIT 0 30
-40 : OPR 0 13
-41 : JPC 0 43
-42 : JMP 0 54
-43 : LOD 0 2
-44 : CAL 1 1
-45 : LIT 0 1
-46 : JMP 0 1
-47 : LOD 0 1
-48 : WRT 0 0
-49 : LOD 0 2
-50 : LIT 0 1
-51 : OPR 0 2
-52 : STO 0 2
-53 : JMP 0 38
-54 : OPR 0 0
+33 : CAL 1 1
+34 : LIT 0 1
+35 : JMP 0 1
+36 : LOD 0 1
+37 : WRT 0 0
+38 : OPR 0 0

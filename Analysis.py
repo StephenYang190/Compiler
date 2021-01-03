@@ -5,7 +5,7 @@ from interpreter import interpreter
 
 if __name__ == "__main__":
 
-    PascalAnalysis = Analysis('fibonacci.txt', 'first.txt', 'follow.txt')
+    PascalAnalysis = Analysis('in.txt', 'first.txt', 'follow.txt')
     arg = PascalAnalysis.prog()
 
     if arg['stop'] is not True:
