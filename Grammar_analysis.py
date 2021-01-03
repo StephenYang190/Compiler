@@ -98,7 +98,6 @@ class Analysis:
         self.semantics.emit("%s" % idname)
         self.body()
         self.semantics.emit("end")
-        return True
 
     # condecl
     def condecl(self):

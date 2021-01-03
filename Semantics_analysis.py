@@ -89,12 +89,6 @@ class Semantics_analysis:
             self.mcode[index] = code
         return True
 
-    def L(self, ch, stnextlist=None, hquad=None):
-        if ch == 0:
-            self.backpatch(stnextlist, hquad)
-        else:
-            pass
-
     def statement(self, ch, arg):
         if ch == 0:
             t = self.tbmng.top()
@@ -160,12 +154,6 @@ class Semantics_analysis:
             facplace = arg['expplace']
 
         return facplace
-
-    def A(self, arg):
-        aidlist = arg['bidlist'] + arg['idname']
-        aidlist = list(set(aidlist))
-
-        return aidlist
 
     def lookup(self, idname):
         t = self.tbmng.top()
